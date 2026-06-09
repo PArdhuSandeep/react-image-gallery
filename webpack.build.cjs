@@ -184,6 +184,10 @@ const jsDemoOutput = Object.assign({}, config, {
         loader: "babel-loader",
       },
       {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: "asset/resource",
+      },
+      {
         // CSS is handled by cssDemoOutput; discard CSS imports here
         test: /\.css$/i,
         type: "asset/source",

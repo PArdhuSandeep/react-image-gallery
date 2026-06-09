@@ -3,8 +3,16 @@ import { createRoot } from "react-dom/client";
 import ImageGallery from "src/components/ImageGallery";
 import "../styles/image-gallery.css";
 
-const PREFIX_URL =
-  "https://raw.githubusercontent.com/xiaolin/react-image-gallery/master/static/";
+// Auto-import all image assets from the Images folder so newly added
+// files are picked up automatically without manual imports.
+function importAll(r) {
+  return r.keys().map(r);
+}
+
+// webpack's require.context will return module URLs for each image.
+const localImages = importAll(
+  require.context("../Images", false, /\.(jpe?g|png|webp)$/i)
+);
 
 class App extends React.Component {
   constructor() {
@@ -25,31 +33,13 @@ class App extends React.Component {
       slideInterval: 2000,
       slideOnThumbnailOver: false,
       thumbnailPosition: "bottom",
-      showVideo: false,
       useWindowKeyDown: true,
       lazyLoad: false,
       maxBullets: 0,
       darkMode: false,
     };
-    this._toggleShowVideo = this._toggleShowVideo.bind(this);
 
-    this.images = [
-      {
-        thumbnail: `${PREFIX_URL}4v.jpg`,
-        original: `${PREFIX_URL}4v.jpg`,
-        embedUrl:
-          "https://www.youtube.com/embed/4pSzhZ76GdM?autoplay=1&showinfo=0",
-        description: "Render custom slides (such as videos)",
-        renderItem: this._renderVideo.bind(this),
-      },
-      {
-        original: `${PREFIX_URL}1.jpg`,
-        thumbnail: `${PREFIX_URL}1t.jpg`,
-        originalClass: "featured-slide",
-        thumbnailClass: "featured-thumb",
-        description: "Custom class for slides & thumbnails",
-      },
-    ].concat(this._getStaticImages());
+    this.images = this._getStaticImages();
   }
 
   _onImageClick(event) {
@@ -66,7 +56,6 @@ class App extends React.Component {
   }
 
   _onSlide(index) {
-    this._resetVideo();
     console.debug("slid to index", index);
   }
 
@@ -97,81 +86,10 @@ class App extends React.Component {
   }
 
   _getStaticImages() {
-    let images = [];
-    for (let i = 2; i < 12; i++) {
-      images.push({
-        original: `${PREFIX_URL}${i}.jpg`,
-        thumbnail: `${PREFIX_URL}${i}t.jpg`,
-      });
-    }
-
-    return images;
-  }
-
-  _resetVideo() {
-    this.setState({ showVideo: false });
-
-    if (this.state.showPlayButton) {
-      this.setState({ showGalleryPlayButton: true });
-    }
-
-    if (this.state.showFullscreenButton) {
-      this.setState({ showGalleryFullscreenButton: true });
-    }
-  }
-
-  _toggleShowVideo() {
-    const { showVideo } = this.state;
-    this.setState({
-      showVideo: !showVideo,
-    });
-
-    if (!showVideo) {
-      if (this.state.showPlayButton) {
-        this.setState({ showGalleryPlayButton: false });
-      }
-
-      if (this.state.showFullscreenButton) {
-        this.setState({ showGalleryFullscreenButton: false });
-      }
-    }
-  }
-
-  _renderVideo(item) {
-    return (
-      <div>
-        {this.state.showVideo ? (
-          <div className="video-wrapper">
-            <button className="close-video" onClick={this._toggleShowVideo} />
-            <iframe
-              allowFullScreen
-              height="315"
-              src={item.embedUrl}
-              style={{ border: "none" }}
-              title="sample video"
-              width="560"
-            />
-          </div>
-        ) : (
-          <>
-            <button className="play-button" onClick={this._toggleShowVideo} />
-            <img
-              alt="sample video cover"
-              className="image-gallery-image"
-              src={item.original}
-            />
-            {item.description && (
-              <span
-                className="image-gallery-description"
-                style={{ right: "0", left: "initial" }}
-              >
-                {item.description}
-              </span>
-            )}
-          </>
-        )}
-      </div>
-    );
+    return localImages.map((src) => ({
+      original: src,
+      thumbnail: src,
+    }));
   }
 
   render() {
@@ -190,40 +108,17 @@ class App extends React.Component {
         </div>
 
         <section className="gallery-demo">
-          <h1 className="gallery-demo-header">React Image Gallery</h1>
+          <h1 className="gallery-demo-header">
+            Pardhasaradhi
+            <br />
+            <span className="gallery-demo-heart">❤️</span>
+            <br />
+            Dr. Dharani Anusha
+          </h1>
           <h3 className="gallery-demo-header-3">
-            A beautiful, responsive, and customizable image gallery component
-            for React applications
+            {/* A beautiful, responsive, and customizable image gallery component
+            for React applications */}
           </h3>
-          <div className="gallery-demo-subheader">
-            <a
-              aria-label="Star xiaolin/react-image-gallery on GitHub"
-              className="github-button"
-              data-icon="octicon-star"
-              data-show-count="true"
-              data-size="large"
-              href="https://github.com/xiaolin/react-image-gallery"
-            >
-              Star
-            </a>
-            <a
-              aria-label="Fork xiaolin/react-image-gallery on GitHub"
-              className="github-button"
-              data-icon="octicon-repo-forked"
-              data-show-count="true"
-              data-size="large"
-              href="https://github.com/xiaolin/react-image-gallery/fork"
-            >
-              Fork
-            </a>
-          </div>
-          <div className="feature-badges">
-            <span className="feature-badge">📱 Mobile Friendly</span>
-            <span className="feature-badge">⌨️ Keyboard Navigation</span>
-            <span className="feature-badge">🎨 Fully Customizable</span>
-            <span className="feature-badge">🖼️ Thumbnail Support</span>
-            <span className="feature-badge">📺 Fullscreen Mode</span>
-          </div>
         </section>
 
         <ImageGallery
@@ -260,216 +155,6 @@ class App extends React.Component {
           onScreenChange={this._onScreenChange.bind(this)}
           onSlide={this._onSlide.bind(this)}
         />
-
-        <div className="app-sandbox">
-          <div className="app-sandbox-content">
-            <h2 className="app-header">Settings</h2>
-
-            <ul className="app-buttons">
-              <li>
-                <div className="app-interval-input-group">
-                  <span className="app-interval-label">Play Interval</span>
-                  <input
-                    className="app-interval-input"
-                    type="text"
-                    value={this.state.slideInterval}
-                    onChange={this._handleInputChange.bind(
-                      this,
-                      "slideInterval"
-                    )}
-                  />
-                </div>
-              </li>
-
-              <li>
-                <div className="app-interval-input-group">
-                  <span className="app-interval-label">Slide Duration</span>
-                  <input
-                    className="app-interval-input"
-                    type="text"
-                    value={this.state.slideDuration}
-                    onChange={this._handleInputChange.bind(
-                      this,
-                      "slideDuration"
-                    )}
-                  />
-                </div>
-              </li>
-
-              <li>
-                <div className="app-interval-input-group">
-                  <span className="app-interval-label">Max Bullets</span>
-                  <input
-                    className="app-interval-input"
-                    min="3"
-                    type="number"
-                    value={this.state.maxBullets}
-                    onChange={this._handleInputChange.bind(this, "maxBullets")}
-                  />
-                </div>
-              </li>
-
-              <li>
-                <div className="app-interval-input-group">
-                  <span className="app-interval-label">
-                    Thumbnail Bar Position
-                  </span>
-                  <select
-                    className="app-interval-input"
-                    value={this.state.thumbnailPosition}
-                    onChange={this._handleThumbnailPositionChange.bind(this)}
-                  >
-                    <option value="bottom">Bottom</option>
-                    <option value="top">Top</option>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                  </select>
-                </div>
-              </li>
-            </ul>
-
-            <ul className="app-checkboxes">
-              {/* Navigation & Controls */}
-              <li>
-                <input
-                  checked={this.state.showNav}
-                  id="show_navigation"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(this, "showNav")}
-                />
-                <label htmlFor="show_navigation">Show arrows</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.showThumbnails}
-                  id="show_thumbnails"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "showThumbnails"
-                  )}
-                />
-                <label htmlFor="show_thumbnails">Show thumbnails</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.showBullets}
-                  id="show_bullets"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "showBullets"
-                  )}
-                />
-                <label htmlFor="show_bullets">Show bullet indicators</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.showIndex}
-                  id="show_index"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(this, "showIndex")}
-                />
-                <label htmlFor="show_index">Show slide counter</label>
-              </li>
-
-              {/* Buttons */}
-              <li>
-                <input
-                  checked={this.state.showPlayButton}
-                  id="show_playbutton"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "showPlayButton"
-                  )}
-                />
-                <label htmlFor="show_playbutton">Show autoplay button</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.showFullscreenButton}
-                  id="show_fullscreen"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "showFullscreenButton"
-                  )}
-                />
-                <label htmlFor="show_fullscreen">Show fullscreen button</label>
-              </li>
-
-              {/* Behavior */}
-              <li>
-                <input
-                  checked={this.state.infinite}
-                  id="infinite"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(this, "infinite")}
-                />
-                <label htmlFor="infinite">Infinite loop</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.slideOnThumbnailOver}
-                  id="slide_on_thumbnail_hover"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "slideOnThumbnailOver"
-                  )}
-                />
-                <label htmlFor="slide_on_thumbnail_hover">
-                  Slide on thumbnail hover
-                </label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.useWindowKeyDown}
-                  id="use_window_keydown"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "useWindowKeyDown"
-                  )}
-                />
-                <label htmlFor="use_window_keydown">Keyboard navigation</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.lazyLoad}
-                  id="lazy_load"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(this, "lazyLoad")}
-                />
-                <label htmlFor="lazy_load">Lazy load images</label>
-              </li>
-
-              {/* Direction */}
-              <li>
-                <input
-                  checked={this.state.slideVertically}
-                  id="slide_vertically"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(
-                    this,
-                    "slideVertically"
-                  )}
-                />
-                <label htmlFor="slide_vertically">Vertical sliding</label>
-              </li>
-              <li>
-                <input
-                  checked={this.state.isRTL}
-                  id="is_rtl"
-                  type="checkbox"
-                  onChange={this._handleCheckboxChange.bind(this, "isRTL")}
-                />
-                <label htmlFor="is_rtl">Right-to-left</label>
-              </li>
-            </ul>
-          </div>
-        </div>
       </section>
     );
   }
