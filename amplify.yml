@@ -9,6 +9,14 @@ frontend:
       commands:
         - npm run build || true
         - node -e "try{require('fs').rmSync('build/types/components',{recursive:true,force:true});}catch(e){}"
+        - |
+          # Ensure demo/index.html exists so Amplify can publish the demo folder
+          if [ ! -f demo/index.html ]; then
+            echo "demo/index.html not found — copying from example/index.html"
+            mkdir -p demo || true
+            cp example/index.html demo/index.html || true
+          fi
+        - ls -la demo || true
   artifacts:
     # The production demo build outputs static files to `demo/`
     baseDirectory: demo
