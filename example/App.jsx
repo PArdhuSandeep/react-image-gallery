@@ -3,16 +3,57 @@ import { createRoot } from "react-dom/client";
 import ImageGallery from "src/components/ImageGallery";
 import "../styles/image-gallery.css";
 
-// Auto-import all image assets from the Images folder so newly added
-// files are picked up automatically without manual imports.
-function importAll(r) {
-  return r.keys().map(r);
-}
+// Use remote S3 image URLs instead of local assets.
+const s3BucketBase = "https://pardhu-anusha-wedding.s3.us-east-1.amazonaws.com/Wedding";
+const remoteImageFiles = [
+  "01.jpg",
+  "02.jpg",
+  "04.jpg",
+  "05.jpg",
+  "06.jpg",
+  "06a.jpg",
+  "07.jpg",
+  "08.jpg",
+  "09.jpg",
+  "1.jpg",
+  "10.jpg",
+  "11.jpg",
+  "12.jpg",
+  "13.jpg",
+  "14.jpg",
+  "15.jpg",
+  "16.jpg",
+  "17.jpg",
+  "18.jpg",
+  "19.jpg",
+  "2.jpg",
+  "20.jpg",
+  "21.jpg",
+  "22.jpg",
+  "24.jpg",
+  "25.jpg",
+  "25end.jpg",
+  "26.jpg",
+  "27.jpg",
+  "29.jpg",
+  "3.jpg",
+  "30.jpg",
+  "31.jpg",
+  "33.jpg",
+  "36.jpg",
+  "4.jpg",
+  "5.jpg",
+  "6.jpg",
+  "7.jpg",
+  "8.jpg",
+  "9.jpg",
+  "Coverpage copy.jpg",
+];
 
-// webpack's require.context will return module URLs for each image.
-const localImages = importAll(
-  require.context("../Images", false, /\.(jpe?g|png|webp)$/i)
-);
+const s3Images = remoteImageFiles.map((fileName) => ({
+  original: `${s3BucketBase}/${fileName}`,
+  thumbnail: `${s3BucketBase}/${fileName}`,
+}));
 
 class App extends React.Component {
   constructor() {
@@ -39,7 +80,7 @@ class App extends React.Component {
       darkMode: false,
     };
 
-    this.images = this._getStaticImages();
+    this.images = this._getRemoteImages();
   }
 
   _onImageClick(event) {
@@ -85,11 +126,8 @@ class App extends React.Component {
     this.setState({ thumbnailPosition: event.target.value });
   }
 
-  _getStaticImages() {
-    return localImages.map((src) => ({
-      original: src,
-      thumbnail: src,
-    }));
+  _getRemoteImages() {
+    return s3Images;
   }
 
   render() {
