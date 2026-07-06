@@ -64,6 +64,12 @@ export interface GalleryItem {
   sizes?: string;
   /** Array of image sets for picture element */
   imageSet?: ImageSet[];
+  /** Type of item: 'image' or 'video' */
+  type?: 'image' | 'video';
+  /** Thumbnail image to use as video poster */
+  posterUrl?: string;
+  /** Internal: Whether this item is the currently active slide */
+  __isActive?: boolean;
   /** Custom render function for this item */
   renderItem?: (item: GalleryItem) => ReactNode;
   /** Custom render function for this thumbnail */

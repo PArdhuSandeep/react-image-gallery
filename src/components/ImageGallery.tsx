@@ -30,6 +30,7 @@ import { useGalleryNavigation } from "src/components/hooks/useGalleryNavigation"
 import { useThumbnails } from "src/components/hooks/useThumbnails";
 import IndexIndicator from "src/components/IndexIndicator";
 import Item from "src/components/Item";
+import Video from "src/components/Video";
 import Slide from "src/components/Slide";
 import SwipeWrapper from "src/components/SwipeWrapper";
 import Thumbnail from "src/components/Thumbnail";
@@ -957,6 +958,29 @@ const ImageGallery = forwardRef<ImageGalleryRef, ImageGalleryProps>(
     const defaultRenderItem = useCallback(
       (item: GalleryItem) => {
         const handleError = onImageError || handleImageError;
+        const isVideo = item.type === 'video';
+
+        if (isVideo) {
+          return (
+            <Video
+              key={`video-${item.original}`}
+              description={item.description}
+              fullscreen={item.fullscreen}
+              isFullscreen={isFullscreen}
+              original={item.original}
+              originalAlt={item.originalAlt}
+              originalHeight={item.originalHeight}
+              originalTitle={item.originalTitle}
+              originalWidth={item.originalWidth}
+              posterUrl={item.posterUrl || item.thumbnail}
+              autoPlay={false}
+              isActive={item.__isActive}
+              onVideoError={(event: React.SyntheticEvent<HTMLVideoElement>) => {
+                handleError?.(event as any);
+              }}
+            />
+          );
+        }
 
         return (
           <Item
@@ -1055,7 +1079,10 @@ const ImageGallery = forwardRef<ImageGalleryRef, ImageGalleryProps>(
             onTouchStart={onTouchStart}
           >
             {showItem ? (
-              handleRenderItemFn(item)
+              handleRenderItemFn({
+                ...item,
+                __isActive: realIndex === currentIndex
+              })
             ) : (
               <div style={{ height: "100%" }} />
             )}

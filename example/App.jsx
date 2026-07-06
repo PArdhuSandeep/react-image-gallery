@@ -53,7 +53,27 @@ const remoteImageFiles = [
 const s3Images = remoteImageFiles.map((fileName) => ({
   original: `${s3BucketBase}/${fileName}`,
   thumbnail: `${s3BucketBase}/${fileName}`,
+  type: 'image',
 }));
+
+// Add video to the gallery
+const s3Video = {
+  original: `${s3BucketBase}/Wedding_teaser.mp4`,
+  thumbnail: `${s3BucketBase}/06.jpg`, // Using an image as thumbnail
+  type: 'video',
+  description: 'Wedding Video - Awaara',
+};
+
+// Mix images and video together
+const allMediaItems = [
+  s3Images[0],
+  s3Images[1],
+  s3Video, // Video in the middle
+  s3Images[2],
+  s3Images[3],
+  s3Images[4],
+  ...s3Images.slice(5),
+];
 
 class App extends React.Component {
   constructor() {
@@ -127,7 +147,7 @@ class App extends React.Component {
   }
 
   _getRemoteImages() {
-    return s3Images;
+    return allMediaItems;
   }
 
   render() {
